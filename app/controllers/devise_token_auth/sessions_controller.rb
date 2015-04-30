@@ -12,7 +12,7 @@ module DeviseTokenAuth
       end
 
       @resource = resource_class.where(uid: email, provider: 'email').first
-
+      binding.pry
       if @resource and valid_params? and @resource.valid_password?(resource_params[:password]) and @resource.confirmed?
         # create client id
         @client_id = SecureRandom.urlsafe_base64(nil, false)
