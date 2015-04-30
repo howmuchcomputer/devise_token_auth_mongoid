@@ -55,36 +55,6 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
     end
 
-    describe "case-insensitive email" do
-
-      before do
-        @resource_class = User
-        @request_params = {
-          email: "AlternatingCase@example.com",
-          password: "secret123",
-          password_confirmation: "secret123",
-          confirm_success_url: Faker::Internet.url
-        }
-      end
-
-      test "success should downcase uid if configured" do
-        @resource_class.case_insensitive_keys = [:email]
-        post '/auth', @request_params
-        assert_equal 200, response.status
-        @data = JSON.parse(response.body)
-        assert_equal "alternatingcase@example.com", @data['data']['uid']
-      end
-
-      test "request should not downcase uid if not configured" do
-        @resource_class.case_insensitive_keys = []
-        post '/auth', @request_params
-        assert_equal 200, response.status
-        @data = JSON.parse(response.body)
-        assert_equal "AlternatingCase@example.com", @data['data']['uid']
-      end
-
-    end
-
     describe "Adding extra params" do
       before do
         @redirect_url     = Faker::Internet.url
@@ -235,6 +205,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
         describe "success" do
           before do
             # test valid update param
+<<<<<<< HEAD
             @resource_class = User
             @new_operating_thetan = 1000000
             @email = "AlternatingCase2@example.com"
@@ -267,6 +238,24 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
             assert_equal @new_operating_thetan, @existing_user.operating_thetan
             assert_equal @email.downcase, @existing_user.email
             assert_equal @email.downcase, @existing_user.uid
+=======
+            @new_operating_thetan = 1000000
+
+            put "/auth", {
+              operating_thetan: @new_operating_thetan
+            }, @auth_headers
+
+            @data = JSON.parse(response.body)
+            @existing_user.reload
+          end
+
+          test "Request was successful" do
+            assert_equal 200, response.status
+          end
+
+          test "User attribute was updated" do
+            assert_equal @new_operating_thetan, @existing_user.operating_thetan
+>>>>>>> e48c2f045fcc133fa545deb9eba509a8518c5f3c
           end
         end
 

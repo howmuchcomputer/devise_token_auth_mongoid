@@ -19,4 +19,7 @@ DeviseTokenAuth.setup do |config|
   # example, using the default '/omniauth', the github oauth2 provider will
   # redirect successful authentications to '/omniauth/github/callback'
   #config.omniauth_prefix = "/omniauth"
+
+  # Whether app needs to be threadsafe/use locks.
+  #config.threadsafe = true
 end

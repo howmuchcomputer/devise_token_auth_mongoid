@@ -1,18 +1,10 @@
+require 'mongoid-locker'
+
 module DeviseTokenAuth::Concerns::User
   extend ActiveSupport::Concern
 
   included do
-    field :provider, type: String
-    field :uid, type: String
-
-    field :encrypted_password, type: String, default: ""
-
-    field :reset_password_token, type: String
-    field :reset_password_sent_at, type: DateTime
-
-    field :remember_created_at, type: DateTime
-
-    field :tokens, type: Hash, default: {}
+    include Mongoid::Locker
 
     # Include default devise modules. Others available are:
     # :confirmable, :lockable, :timeoutable and :omniauthable
@@ -23,18 +15,9 @@ module DeviseTokenAuth::Concerns::User
     #serialize :tokens, JSON
 
     validates_presence_of :email, if: Proc.new { |u| u.provider == 'email' }
-    validates_presence_of :uid, if: Proc.new { |u| u.provider != 'email' }
 
     # only validate unique emails among email registration users
     validate :unique_email_user, on: :create
-
-    # can't set default on text fields in mysql, simulate here instead.
-    after_save :set_empty_token_hash
-    after_initialize :set_empty_token_hash
-
-    # keep uid in sync with email
-    before_save :sync_uid
-    before_create :sync_uid
 
     # get rid of dead tokens
     before_save :destroy_expired_tokens
@@ -132,7 +115,11 @@ module DeviseTokenAuth::Concerns::User
       self.tokens[client_id]['last_token'] and
 
       # ensure that previous token falls within the batch buffer throttle time of the last request
+<<<<<<< HEAD
       Time.parse(self.tokens[client_id]['updated_at']) > Time.now - DeviseTokenAuth.batch_request_buffer_throttle and
+=======
+      self.tokens[client_id]['updated_at'] > Time.now - DeviseTokenAuth.batch_request_buffer_throttle and
+>>>>>>> e48c2f045fcc133fa545deb9eba509a8518c5f3c
 
       # ensure that the token is valid
       BCrypt::Password.new(self.tokens[client_id]['last_token']) == token
@@ -197,10 +184,7 @@ module DeviseTokenAuth::Concerns::User
     return build_auth_header(token, client_id)
   end
 
-
   protected
-
-
   # NOTE: ensure that fragment comes AFTER querystring for proper $location
   # parsing using AngularJS.
   def generate_url(url, params = {})
@@ -224,19 +208,10 @@ module DeviseTokenAuth::Concerns::User
     end
   end
 
-  def set_empty_token_hash
-    self.tokens ||= {} if has_attribute?(:tokens)
-  end
-
-  def sync_uid
-    self.uid = email if provider == 'email'
-  end
-
   def destroy_expired_tokens
-    self.tokens.delete_if{|cid,v|
+    self.tokens.delete_if {|cid,v|
       expiry = v[:expiry] || v["expiry"]
       DateTime.strptime(expiry.to_s, '%s') < Time.now
     }
   end
-
 end

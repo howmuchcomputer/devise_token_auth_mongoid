@@ -7,14 +7,8 @@ module DeviseTokenAuth
 
     def create
       @resource            = resource_class.new(sign_up_params)
+      @resource.uid        = sign_up_params[:email]
       @resource.provider   = "email"
-
-      # honor devise configuration for case_insensitive_keys
-      if resource_class.case_insensitive_keys.include?(:email)
-        @resource.email = sign_up_params[:email].downcase
-      else
-        @resource.email = sign_up_params[:email]
-      end
 
       # success redirect url is required
       unless params[:confirm_success_url]
@@ -27,7 +21,7 @@ module DeviseTokenAuth
 
       begin
         # override email confirmation, must be sent manually from ctrl
-        resource_class.skip_callback("create", :after, :send_on_create_confirmation_instructions)
+        @resource.class.skip_callback("create", :after, :send_on_create_confirmation_instructions)
         if @resource.save
 
           unless @resource.confirmed?
@@ -76,7 +70,6 @@ module DeviseTokenAuth
 
     def update
       if @resource
-        
         if @resource.update_attributes(account_update_params)
           render json: {
             status: 'success',
