@@ -115,11 +115,7 @@ module DeviseTokenAuth::Concerns::User
       self.tokens[client_id]['last_token'] and
 
       # ensure that previous token falls within the batch buffer throttle time of the last request
-<<<<<<< HEAD
-      Time.parse(self.tokens[client_id]['updated_at']) > Time.now - DeviseTokenAuth.batch_request_buffer_throttle and
-=======
       self.tokens[client_id]['updated_at'] > Time.now - DeviseTokenAuth.batch_request_buffer_throttle and
->>>>>>> e48c2f045fcc133fa545deb9eba509a8518c5f3c
 
       # ensure that the token is valid
       BCrypt::Password.new(self.tokens[client_id]['last_token']) == token
